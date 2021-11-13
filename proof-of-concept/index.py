@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 print("Access-Control-Allow-Origin: *\r\n"),
+print("Referrer-Policy: unsafe-url\r\n"),
 #print("Access-Control-Allow-Methods: GET, POST, HEAD, PUT\r\n"),
 #print("Access-Control-Allow-Headers: Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token\r\n"),
 print("Content-type: text/html\r\n\r\n"),
@@ -15,7 +16,7 @@ print '''
         return new Promise(resolve => setTimeout(resolve, ms));
     }
     function doMainLoop() {
-        setInterval(getFromQueue, 1000);
+        setInterval(getFromQueue, 5000);
         setInterval(scrollToBottom, 250);
     } 
     function scrollToBottom() {
@@ -29,11 +30,26 @@ print '''
         xmlHttp.onload = function (e) {
             if (xmlHttp.readyState === 4) {
                 if (xmlHttp.status === 200) {
+                    urlToFetch = xmlHttp.responseText.trim();
+
+                    // Update status log
                     if (document.getElementById("status").innerHTML != "") {
                         document.getElementById("status").innerHTML += "<br>\\n";
                     }
-                    document.getElementById("status").innerHTML += xmlHttp.responseText;
-               } else {
+                    document.getElementById("status").innerHTML += urlToFetch;
+                    // Fetch the page
+                    var fetcher = new XMLHttpRequest();
+                    fetcher.open( "GET", "https://twu.net/curler/?key=" + encodeURIComponent("#igj2iqjQ_g-Yghj") + "&url=" + encodeURIComponent(urlToFetch), true  );
+                    fetcher.onload = function (e) {
+                        if (fetcher.readyState === 4) {
+                            if (fetcher.status === 200) {
+                                document.getElementById("status").innerHTML = fetcher.responseText;
+                            }
+                        }
+                    }
+                    fetcher.send( null ); // Complete request
+
+                } else {
                     console.error(xmlHttp.statusText)
                 }
             }
